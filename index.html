@@ -3,38 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML with JavaScript Example</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+    <title>Document</title>
+    <!-- Link to your external stylesheet -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Interactive Web Page</h1>
-    
-    <!-- This paragraph will be modified by JavaScript -->
-    <p id="message">Click the button below to change this text.</p>
-    
-    <!-- The onclick attribute triggers the JavaScript function -->
-    <button onclick="changeText()">Click Me!</button>
+    <h1>Home Page</h1>
+    <a href="https://pete-olson.com/page-1.html">Page 1 Google</a>
 
-    <!-- JavaScript is placed inside the script tag -->
-    <script>
-        function changeText() {
-            // Locates the paragraph element by its ID and updates its content
-            document.getElementById("message").innerHTML = "Hello! The JavaScript successfully updated this text.";
-        }
-    </script>
-
+    <!-- Link to your JavaScript file -->
+    <script src="script.js"></script>
 </body>
 </html>
-
