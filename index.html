@@ -1,25 +1,28 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GitHub Notes Explorer</title><link rel="stylesheet" href="style.css"></head><body>
-<header><strong>📁 GitHub Notes Explorer</strong><span id="status">Not connected</span><button id="settingsBtn">⚙ Connect</button></header>
-<div class="toolbar"><button id="refreshBtn">↻ Refresh</button><button id="folderBtn">+ Folder</button><button id="noteBtn">+ Note</button><button id="fileBtn">+ File</button><button id="uploadBtn">↑ Upload</button><input type="file" id="uploadInput" multiple hidden><input id="search" placeholder="Search names and text…" aria-label="Search"><button id="searchBtn">Search</button></div>
-<div class="workspace"><aside><div class="sidehead">FILES <span id="branch"></span></div><div id="tree" role="tree"></div></aside><main><div class="filehead"><span id="pathLabel">Select a file</span><div><button id="renameBtn" disabled>Rename</button><button id="moveBtn" disabled>Move</button><button id="deleteBtn" disabled>Delete</button><button id="downloadBtn" disabled>Download</button></div></div><div id="viewer"><div class="welcome"><h2>Your GitHub-backed file library</h2><p>Connect a repository to browse folders, edit notes and code, and preview uploaded files.</p><p>Use a private repository for personal content. Your token stays in this browser session and is never stored in the published site.</p></div></div><div class="editorbar" id="editorbar" hidden><span id="editHint"></span><button id="saveBtn">Save to GitHub</button></div></main></div>
-<dialog id="settings"><form method="dialog"><h2>Connect to GitHub</h2><label>Repository owner<input id="owner" placeholder="your-username" required></label><label>Repository name<input id="repo" placeholder="my-private-notes" required></label><label>Branch<input id="branchInput" value="main" required></label><label>Fine-grained personal access token<input id="token" type="password" placeholder="github_pat_…" required></label><p class="hint">Token needs Contents: Read and write on this repository. For a private repository, also grant access to that repository. Token is kept only in memory until this tab closes or reloads. Do not place a token in a public repo.</p><div class="actions"><button value="cancel">Cancel</button><button id="connectBtn" value="default">Connect</button></div></form></dialog>
-<div id="toast" role="status"></div><script>
-window.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('settingsBtn');
-  const dlg = document.getElementById('settings');
-  if (btn && dlg) btn.addEventListener('click', () => {
-    if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); }
-    else { dlg.setAttribute('open', ''); }
-  });
-  setTimeout(() => {
-    if (!window.notesExplorerReady) {
-      const status = document.getElementById('status');
-      status.textContent = 'App script failed to load';
-      status.title = 'Check that app.js is in the same GitHub repository folder as index.html, then refresh.';
-      const toast = document.getElementById('toast');
-      toast.textContent = 'Could not load app.js. Verify index.html, app.js, and style.css are in the same folder in GitHub Pages.';
-      toast.style.display = 'block';
-    }
-  }, 1200);
-});
-</script><script src="app.js?v=0.1.1" onerror="document.getElementById('status').textContent='Missing app.js'"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    
+    <!-- Link to your external stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="pete-olson.com/note-app">Note App</a>
+    <header>
+        <h1>Welcome to My Website</h1>
+    </header>
+
+    <main>
+        <p>This is where your main page content goes.</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 My Website</p>
+    </footer>
+
+    <!-- Link to your external JavaScript file -->
+    <script src="script.js"></script>
+</body>
+</html>
