@@ -1,3 +1,53 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Links</title><style>:root{font-family:system-ui,Arial,sans-serif;color:#17243a;background:#f4f7fb}body{margin:0}header{background:#17365d;color:white;padding:22px max(20px,calc((100vw - 1000px)/2))}h1{margin:0 0 5px}main{max-width:1000px;margin:25px auto;padding:0 18px}.toolbar,.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}input,select,button,textarea{font:inherit;padding:10px;border:1px solid #cbd5e1;border-radius:7px}input[type=search]{flex:1;min-width:180px}button{background:#17365d;color:white;cursor:pointer;border:0}button.secondary{background:#e2e8f0;color:#17243a}button.danger{background:#a52727}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:20px}.card{background:white;border:1px solid #dbe2ea;border-radius:10px;padding:18px;overflow-wrap:anywhere}.card a{font-weight:700;color:#165a99}.muted{color:#627083;font-size:.9rem}.card .actions{margin-top:15px}dialog{border:0;border-radius:12px;max-width:440px;width:calc(100% - 40px);box-shadow:0 12px 60px #0003}dialog form{display:grid;gap:10px}dialog input,dialog textarea{width:100%;box-sizing:border-box}dialog::backdrop{background:#14243b99}#notice{min-height:24px;color:#9b2424}footer{max-width:1000px;margin:20px auto;padding:0 18px;color:#64748b;font-size:.85rem}</style></head><body><header><h1>My Links</h1><div>Personal bookmark manager</div></header><main><div class="toolbar"><input id="search" type="search" placeholder="Search links..."><select id="category"><option value="">All categories</option></select><button id="add">+ Add link</button><button id="export" class="secondary">Export JSON</button><button id="import" class="secondary">Import JSON</button><input id="file" type="file" accept="application/json,.json" hidden></div><p id="notice" role="status"></p><section id="links" class="grid"></section></main><footer>Links are stored in this browser only. Export a backup to transfer them to another device. GitHub Pages does not provide server-side password protection.</footer><dialog id="editor"><form id="editform"><h2 id="formtitle">Add link</h2><label>Name<input id="name" required maxlength="150"></label><label>URL<input id="url" type="url" required placeholder="https://example.com"></label><label>Category<input id="cat" maxlength="80" placeholder="General"></label><label>Description<textarea id="desc" rows="3" maxlength="1000"></textarea></label><div class="actions"><button type="submit">Save</button><button type="button" id="cancel" class="secondary">Cancel</button></div></form></dialog><script>
-'use strict';const KEY='personal-links-v1';let items=[];let editing=null;const $=id=>document.getElementById(id);function load(){try{const data=JSON.parse(localStorage.getItem(KEY)||'[]');items=Array.isArray(data)?data:[]}catch{items=[]}}function save(){try{localStorage.setItem(KEY,JSON.stringify(items));$('notice').textContent='Saved in this browser.'}catch{$('notice').textContent='Unable to save: browser storage may be full or disabled.'}}function safeUrl(s){try{const u=new URL(s);return ['https:','http:'].includes(u.protocol)?u.href:null}catch{return null}}function render(){const cats=[...new Set(items.map(x=>x.category||'General'))].sort();const selected=$('category').value;$('category').replaceChildren(new Option('All categories',''),...cats.map(c=>new Option(c,c)));$('category').value=cats.includes(selected)?selected:'';const q=$('search').value.toLowerCase();const shown=items.filter(x=>(!$('category').value||(x.category||'General')===$('category').value)&&[x.name,x.url,x.category,x.description].join(' ').toLowerCase().includes(q));$('links').replaceChildren();for(const item of shown){const card=document.createElement('article');card.className='card';const a=document.createElement('a');a.textContent=item.name;a.href=safeUrl(item.url)||'#';a.target='_blank';a.rel='noopener noreferrer';const cat=document.createElement('p');cat.className='muted';cat.textContent=item.category||'General';const desc=document.createElement('p');desc.textContent=item.description||'';const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.textContent='Edit';edit.className='secondary';edit.onclick=()=>openEditor(item.id);const del=document.createElement('button');del.textContent='Delete';del.className='danger';del.onclick=()=>{if(confirm('Delete "'+item.name+'"?')){items=items.filter(x=>x.id!==item.id);save();render()}};actions.append(edit,del);card.append(a,cat,desc,actions);$('links').append(card)}if(!shown.length){const p=document.createElement('p');p.textContent='No links found. Click Add link to begin.';$('links').append(p)}}function openEditor(id=null){editing=id;const x=items.find(v=>v.id===id);$('formtitle').textContent=x?'Edit link':'Add link';$('name').value=x?.name||'';$('url').value=x?.url||'';$('cat').value=x?.category||'';$('desc').value=x?.description||'';$('editor').showModal()}$('add').onclick=()=>openEditor();$('cancel').onclick=()=>$('editor').close();$('editform').onsubmit=e=>{e.preventDefault();const url=safeUrl($('url').value.trim());if(!url){alert('Enter a valid http or https URL.');return}const x={id:editing||crypto.randomUUID(),name:$('name').value.trim(),url,category:$('cat').value.trim()||'General',description:$('desc').value.trim()};if(editing){items=items.map(v=>v.id===editing?x:v)}else items.push(x);save();$('editor').close();render()};$('search').oninput=render;$('category').onchange=render;$('export').onclick=()=>{const blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='my-links.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};$('import').onclick=()=>$('file').click();$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());if(!Array.isArray(data))throw Error('Expected a JSON array');const valid=data.map(x=>({id:crypto.randomUUID(),name:String(x.name||'').trim(),url:safeUrl(x.url),category:String(x.category||'General'),description:String(x.description||'')}));if(valid.some(x=>!x.name||!x.url))throw Error('Each entry needs a name and valid URL');if(confirm('Replace all current links with '+valid.length+' imported links?')){items=valid;save();render()}}catch(err){alert('Import failed: '+err.message)}e.target.value=''};load();render();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Moved</title>
+    
+    <!-- 1. Meta Refresh: Redirects instantly (0 seconds delay). Change URL to your target path. -->
+    <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbzRQnIwZ1XLt8GzCMNj5aJ6BgKzAU2a2kR5fTU_oxunNUHXqbLNiBYyoUMxh4AmHskU/exec">
+    
+    <!-- 2. Prevent search engines from indexing this temporary redirect page -->
+    <meta name="robots" content="noindex, follow">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-align: center;
+            padding: 50px 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Redirecting...</h1>
+        <p>This page has moved. You should be redirected automatically in a moment.</p>
+        <!-- 3. Fallback Link: In case the visitor has automation or scripts disabled -->
+        <p>If you are not redirected, click here: <a href="https://example.com/new-page">Go to the new page</a>.</p>
+    </div>
+
+    <!-- 4. JavaScript Fallback: Executes immediately if meta refresh fails -->
+    <script>
+        window.location.replace("https://example.com/new-page");
+    </script>
+</body>
+</html>
